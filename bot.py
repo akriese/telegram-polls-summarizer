@@ -6,6 +6,7 @@ from telethon import TelegramClient, functions
 
 dotenv.load_dotenv()
 
+
 def get_env_var(var):
     res = os.getenv(var)
     if res is None:
@@ -13,9 +14,11 @@ def get_env_var(var):
         sys.exit(1)
     return res
 
+
 API_ID = int(get_env_var("API_ID"))
 API_HASH = get_env_var("API_HASH")
 CHAT_ID = int(get_env_var("CHAT_ID"))
+
 
 def id_to_name(id, users):
     for u in users:
@@ -29,6 +32,7 @@ def id_to_name(id, users):
 
     return ""
 
+
 async def main(client):
     # shape of a key: user id
     # shape of a value: dict: username and points as entries
@@ -40,11 +44,13 @@ async def main(client):
             continue
 
         # request poll vote details
-        result = await client(functions.messages.GetPollVotesRequest(
-            peer=CHAT_ID,
-            id=m.id,
-            limit=100,
-        ))
+        result = await client(
+            functions.messages.GetPollVotesRequest(
+                peer=CHAT_ID,
+                id=m.id,
+                limit=100,
+            )
+        )
         if result is None:
             raise Exception()
 
@@ -66,7 +72,7 @@ async def main(client):
                 user_points[id] = {
                     "points": 0,
                     "attempts": 0,
-                    "name": id_to_name(id, result.users)
+                    "name": id_to_name(id, result.users),
                 }
 
             user_points[id]["attempts"] += 1
@@ -80,15 +86,15 @@ async def main(client):
     strings = []
     for arr in list_of_players:
         p, a = arr[1]["points"], arr[1]["attempts"]
-        strings.append(f'{arr[1]["name"]}: {p}/{a} ({p/a:.3f})')
+        sep = "\t" if len(arr[1]["name"]) > 6 else "\t\t"
+        strings.append(f'{arr[1]["name"]}:{sep} {p}/{a} ({p/a:.3f})')
 
     print("\n".join(strings))
 
 
 if __name__ == "__main__":
-    client = TelegramClient('my_session', API_ID, API_HASH)
+    client = TelegramClient("my_session", API_ID, API_HASH)
     client.start()
 
     with client:
         client.loop.run_until_complete(main(client))
-
