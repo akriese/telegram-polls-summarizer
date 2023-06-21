@@ -17,6 +17,10 @@ To use `telethon`, follow its guide on how to set up a telegram app
 
 Rename the `.env.example` to `.env` and paste the `app_id` and `app_hash` into it.
 
+Run `python bot.py --get-chat-ids` to get a list of all your current chat group
+IDs and look for the one that you want to analyze. Copy the ID (likely negative)
+into the `.env` file as `CHAT_ID`.
+
 ## Run
 
 Simply run `python bot.py` with the correct `python` environment.

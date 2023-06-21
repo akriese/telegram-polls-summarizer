@@ -80,21 +80,33 @@ async def main(client):
                 user_points[id]["points"] += 1
 
     # sort dict's entries by points and print them nicely
-    list_of_players = list(user_points.items())
-    list_of_players.sort(key=lambda arr: arr[1]["points"])
+    list_of_players = list(user_points.values())
+    list_of_players.sort(key=lambda player: player["points"])
+
+    max_name_length = max([len(player["name"]) for player in list_of_players])
 
     strings = []
-    for arr in list_of_players:
-        p, a = arr[1]["points"], arr[1]["attempts"]
-        sep = "\t" if len(arr[1]["name"]) > 6 else "\t\t"
-        strings.append(f'{arr[1]["name"]}:{sep} {p}/{a} ({p/a:.3f})')
+    for player in list_of_players:
+        p, a, name = player["points"], player["attempts"], player["name"]
+        padding = " " * (max_name_length - len(name))
+        strings.append(f"{name}:{padding} {p}/{a} ({p/a:.3f})")
 
     print("\n".join(strings))
+
+
+async def get_chat_ids(client):
+    async for dialog in client.iter_dialogs():
+        if dialog.is_group or dialog.is_channel:
+            print(f"{dialog.name}: {dialog.id}")
 
 
 if __name__ == "__main__":
     client = TelegramClient("my_session", API_ID, API_HASH)
     client.start()
 
-    with client:
-        client.loop.run_until_complete(main(client))
+    if len(sys.argv) > 1 and sys.argv[1] == "--get-chat-ids":
+        with client:
+            client.loop.run_until_complete(get_chat_ids(client))
+    else:
+        with client:
+            client.loop.run_until_complete(main(client))
